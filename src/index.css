@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Brand palette (from AppCredit brand guide) ────────────────────── */
+  --color-porcelain: #f1f3f4;
+  --color-dodger: #2593f4;   /* primary */
+  --color-malibu: #65c4fa;   /* secondary */
+  --color-polo: #7facd5;     /* tertiary */
+
+  /* Tints/shades derived from Dodger Blue for hover/active/focus states */
+  --color-dodger-50: #eef7ff;
+  --color-dodger-100: #dbedfe;
+  --color-dodger-200: #b8dcfe;
+  --color-dodger-300: #85c4fd;
+  --color-dodger-400: #4ba5fa;
+  --color-dodger-500: #2593f4;
+  --color-dodger-600: #1470d1;
+  --color-dodger-700: #1359a9;
+  --color-dodger-800: #154b89;
+  --color-dodger-900: #163f71;
+
+  /* ── Neutrals — standard slate scale, not a brand-specified value.
+     Used for text/borders/surfaces since only accent colors were given. ── */
+  --color-ink-900: #14181f;
+  --color-ink-700: #333a45;
+  --color-ink-500: #5c6675;
+  --color-ink-400: #838d9a;
+  --color-ink-300: #aeb6c0;
+  --color-ink-200: #d3d8de;
+  --color-ink-100: #e6e9ec;
+  --color-ink-50: #f6f7f8;
+
+  /* ── Semantic colors — conventional defaults (success/warning/danger),
+     not from the brand guide. Flagged for confirmation. ── */
+  --color-success-50: #eafbf1;
+  --color-success-500: #17a568;
+  --color-success-700: #0e7a4d;
+
+  --color-warning-50: #fff8e8;
+  --color-warning-500: #d99a1b;
+  --color-warning-700: #9c6e0f;
+
+  --color-danger-50: #fdeeee;
+  --color-danger-500: #e0453f;
+  --color-danger-700: #ad2f2a;
+
+  /* ── Typography ── */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* ── Radii used consistently across the app ── */
+  --radius-card: 0.875rem;
+  --radius-control: 0.5rem;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    @apply bg-porcelain text-ink-900 font-sans antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-dodger-500);
+    outline-offset: 2px;
+  }
+}
