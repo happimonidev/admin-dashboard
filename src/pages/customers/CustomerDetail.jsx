@@ -11,6 +11,7 @@ import {
   useDeactivateCustomer,
   useReactivateCustomer,
   useUpdateCreditWorthiness,
+  useUpdateKycStep,
 } from '../../hooks/useCustomers';
 import Card from '../../components/ui/Card';
 import Spinner from '../../components/ui/Spinner';
@@ -31,6 +32,7 @@ import { toImageSrc } from '../../lib/image';
 const TABS = [
   { key: 'overview', label: 'Overview' },
   { key: 'kyc', label: 'KYC', anyOf: ['view_kyc_full', 'view_kyc_limited'] },
+  { key: 'kyc-step', label: 'KYC Step', anyOf: ['manage_customer_kyc_step'] },
   {
     key: 'loans',
     label: 'Loans',
@@ -311,6 +313,80 @@ function OverviewTab({ customer }) {
   );
 }
 
+// Matches the backend's exact validation list — kept in sync manually since
+// there's no endpoint that exposes this enum for the frontend to fetch.
+const VALID_KYC_STEPS = [
+  'PHONE_VERIFICATION',
+  'FACIAL_IMAGE',
+  'PERSONAL_INFO',
+  'RELATIONSHIP_CONTACT',
+  'INCOME_INFO',
+  'COMPLETE',
+];
+
+function EditKycStepModal({ open, onClose, userID, currentStep }) {
+  const [kycStep, setKycStep] = useState(currentStep || '');
+  const [reason, setReason] = useState('');
+  const mutation = useUpdateKycStep(userID);
+
+  const handleClose = () => {
+    mutation.reset();
+    setReason('');
+    onClose();
+  };
+
+  const handleSave = async () => {
+    try {
+      await mutation.mutateAsync({ kycStep, reason: reason || undefined });
+      handleClose();
+    } catch {
+      // Error surfaced via mutation.error below.
+    }
+  };
+
+  return (
+    <Modal open={open} onClose={handleClose} title="Update KYC step">
+      {mutation.isError && (
+        <div className="mb-3 rounded-control bg-danger-50 px-3 py-2 text-sm text-danger-700">
+          {mutation.error.message}
+        </div>
+      )}
+      <p className="mb-3 text-sm text-ink-500">
+        Manually override this customer's KYC step — useful when a customer is stuck,
+        needs to redo a step, or was incorrectly flagged as incomplete.
+      </p>
+      <label className="block text-sm font-medium text-ink-700">
+        KYC step
+        <select
+          value={kycStep}
+          onChange={(e) => setKycStep(e.target.value)}
+          className="mt-1 block w-full rounded-control border border-ink-200 px-3 py-2 text-sm focus:border-dodger-500"
+        >
+          {VALID_KYC_STEPS.map((step) => (
+            <option key={step} value={step}>{step}</option>
+          ))}
+        </select>
+      </label>
+      <label className="mt-3 block text-sm font-medium text-ink-700">
+        Reason (optional)
+        <textarea
+          rows={2}
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="e.g. customer reported being stuck on this step"
+          className="mt-1 block w-full rounded-control border border-ink-200 px-3 py-2 text-sm focus:border-dodger-500"
+        />
+      </label>
+      <div className="mt-4 flex justify-end gap-2">
+        <Button variant="secondary" onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleSave} disabled={!kycStep || mutation.isPending}>
+          {mutation.isPending ? 'Saving…' : 'Save'}
+        </Button>
+      </div>
+    </Modal>
+  );
+}
+
 function KYCTab({ userID }) {
   const { data, isLoading, error } = useCustomerKYC(userID, true);
 
@@ -355,6 +431,42 @@ function KYCTab({ userID }) {
           )}
         </div>
       )}
+    </Card>
+  );
+}
+
+// Deliberately separate from KYCTab and its view_kyc_full/view_kyc_limited
+// gate — this tab is reachable purely via manage_customer_kyc_step, so a
+// role that can edit the step doesn't need to also hold KYC-viewing rights.
+// Uses the customer profile data already loaded by the page (kycStep is
+// part of that projection too) rather than a fresh fetch.
+function KycStepTab({ userID, customer }) {
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
+  return (
+    <Card className="p-4">
+      <dl>
+        <div className="flex items-center justify-between gap-4 border-b border-ink-50 py-2.5 last:border-0">
+          <dt className="text-sm text-ink-500">Current KYC step</dt>
+          <dd className="flex items-center gap-2 text-right text-sm font-medium text-ink-900">
+            {customer?.kycStep || '—'}
+            <button
+              type="button"
+              onClick={() => setEditModalOpen(true)}
+              className="text-xs font-medium text-dodger-600 hover:underline"
+            >
+              Edit
+            </button>
+          </dd>
+        </div>
+      </dl>
+      <EditKycStepModal
+        key={editModalOpen ? 'open' : 'closed'}
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        userID={userID}
+        currentStep={customer?.kycStep}
+      />
     </Card>
   );
 }
@@ -502,6 +614,7 @@ export default function CustomerDetail() {
 
           {activeTab === 'overview' && <OverviewTab customer={customer} />}
           {activeTab === 'kyc' && <KYCTab userID={userID} />}
+          {activeTab === 'kyc-step' && <KycStepTab userID={userID} customer={customer} />}
           {activeTab === 'loans' && <LoansTab userID={userID} />}
           {activeTab === 'bank' && <BankTab userID={userID} />}
         </>

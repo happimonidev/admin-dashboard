@@ -510,7 +510,7 @@ export default function LeadsList() {
             ...(activeTab === 'all' ? [{
               key: 'assignedTo',
               header: 'Assigned To',
-              accessor: (row) => (row.assignedTo ? (nameByID[row.assignedTo] || row.assignedTo) : 'Unassigned'),
+              accessor: (row) => (row.assignedTo ? (nameByID[row.assignedTo] || 'Former/reassigned staff') : 'Unassigned'),
               hideOnMobile: true,
             }] : []),
             {

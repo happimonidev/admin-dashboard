@@ -59,6 +59,17 @@ const unwrapVoid = (result) => {
   if (!result.success) throw new Error(result.message);
 };
 
+export const useUpdateKycStep = (userID) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ kycStep, reason }) =>
+      unwrapVoid(await customersApi.updateKycStep(userID, kycStep, reason)),
+    // Prefix match invalidates both ['customer', userID] (profile, which
+    // also carries kycStep) and ['customer', userID, 'kyc'] (the KYC tab).
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['customer', userID] }),
+  });
+};
+
 export const useDeactivateCustomer = (userID) => {
   const queryClient = useQueryClient();
   return useMutation({

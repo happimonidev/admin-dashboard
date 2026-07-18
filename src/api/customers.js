@@ -36,6 +36,15 @@ export const getCustomerVirtualAccount = async (userID) => {
   return data;
 };
 
+// PATCH /admin/customers/:userID/kyc-step — requires manage_customer_kyc_step
+export const updateKycStep = async (userID, kycStep, reason) => {
+  const { data } = await apiClient.patch(`/customers/${userID}/kyc-step`, {
+    kycStep,
+    reason,
+  });
+  return data;
+};
+
 // PATCH /admin/customers/:userID/deactivate — requires manage_customer_status
 export const deactivateCustomer = async (userID, reason) => {
   const { data } = await apiClient.patch(`/customers/${userID}/deactivate`, { reason });
