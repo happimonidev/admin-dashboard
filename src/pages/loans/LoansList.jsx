@@ -137,7 +137,7 @@ function OverdueTab({ onRowClick, search }) {
           { key: 'loanID', header: 'Loan ID', className: 'font-mono text-xs text-ink-500' },
           customerColumn,
           { key: 'loanAmount', header: 'Amount', render: (row) => formatNaira(row.loanAmount), sortable: true },
-          { key: 'repaymentAmount', header: 'Repayment', render: (row) => formatNaira(row.repaymentAmount), hideOnMobile: true },
+          { key: 'repaymentAmount', header: 'Outstanding', render: (row) => formatNaira(row.repaymentAmount), hideOnMobile: true },
           { key: 'penalty', header: 'Penalty', render: (row) => formatNaira(row.penalty) },
           { key: 'daysOverdue', header: 'Days overdue', sortable: true },
           { key: 'repaymentDate', header: 'Due date', render: (row) => formatDate(row.repaymentDate) },
@@ -288,7 +288,19 @@ function RepaymentLogsTab({ onRowClick, search }) {
           { key: 'loanAmount', header: 'Amount', render: (row) => formatNaira(row.loanAmount), sortable: true },
           { key: 'paidAmount', header: 'Paid', render: (row) => formatNaira(row.paidAmount) },
           { key: 'penalty', header: 'Penalty', render: (row) => formatNaira(row.penalty), hideOnMobile: true },
-          { key: 'updatedAt', header: 'Closed', render: (row) => formatDate(row.updatedAt), sortable: true },
+          {
+            key: 'repaymentStatus',
+            header: 'Repayment',
+            accessor: (row) => (row.isFullRepayment ? 'Full repayment' : 'Partial payment'),
+            render: (row) => (
+              <div className="flex items-center gap-1.5">
+                <Badge tone={row.isFullRepayment ? 'success' : 'warning'}>
+                  {row.isFullRepayment ? 'Full' : 'Partial'}
+                </Badge>
+                <span className="text-xs text-ink-400">{getLoanStatusMeta(row.status).label}</span>
+              </div>
+            ),
+          },
         ]}
       />
       <PaginationControls page={page} setPage={setPage} total={total} limit={limit} />
