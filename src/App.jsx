@@ -7,6 +7,7 @@ import ForcePasswordChange from './pages/auth/ForcePasswordChange';
 import DashboardHome from './pages/dashboard/DashboardHome';
 import CustomersList from './pages/customers/CustomersList';
 import CustomerDetail from './pages/customers/CustomerDetail';
+import IncompleteRegistrationsList from './pages/incompleteRegistrations/IncompleteRegistrationsList';
 import LoansList from './pages/loans/LoansList';
 import LoanDetail from './pages/loans/LoanDetail';
 import LeadsList from './pages/leads/LeadsList';
@@ -59,6 +60,14 @@ export default function App() {
               ]}
             >
               <CustomerDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/incomplete-registrations"
+          element={
+            <ProtectedRoute anyOf={['view_all_incomplete_registrations', 'view_assigned_incomplete_registrations']}>
+              <IncompleteRegistrationsList />
             </ProtectedRoute>
           }
         />

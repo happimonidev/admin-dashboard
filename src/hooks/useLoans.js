@@ -35,6 +35,14 @@ export const useOverdueLoans = (params = {}, enabled = true) =>
     placeholderData: (prev) => prev,
   });
 
+export const useDueLoans = (params = {}, enabled = true) =>
+  useQuery({
+    queryKey: ['loans', 'due', params],
+    queryFn: async () => unwrapWithTotal(await loansApi.getDueLoans(params)),
+    enabled,
+    placeholderData: (prev) => prev,
+  });
+
 export const useRepaymentLogs = (params = {}, enabled = true) =>
   useQuery({
     queryKey: ['loans', 'repayment-logs', params],

@@ -18,6 +18,13 @@ export const getOverdueLoans = async (params = {}) => {
   return data;
 };
 
+// GET /admin/loans/due?skip=&limit=&search=&export= — loans due today,
+// no from/to (fixed one-day window by definition, not a range)
+export const getDueLoans = async (params = {}) => {
+  const { data } = await apiClient.get('/loans/due', { params });
+  return data;
+};
+
 // GET /admin/loans/repayment-logs?skip=&limit=&search=&export=
 export const getRepaymentLogs = async (params = {}) => {
   const { data } = await apiClient.get('/loans/repayment-logs', { params });

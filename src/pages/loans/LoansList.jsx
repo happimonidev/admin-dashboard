@@ -5,6 +5,7 @@ import {
   useAllLoans,
   useLoanQueue,
   useOverdueLoans,
+  useDueLoans,
   useRepaymentLogs,
 } from '../../hooks/useLoans';
 import { useServerPagination, DEFAULT_PAGE_SIZE } from '../../hooks/useServerPagination';
@@ -20,6 +21,7 @@ import { formatDate, formatNaira } from '../../lib/format';
 const TABS = [
   { key: 'queue', label: 'Queue', permission: 'view_loan_queue' },
   { key: 'overdue', label: 'Overdue', permission: 'view_overdue_loans' },
+  { key: 'due', label: 'Due Today', permission: 'view_overdue_loans' },
   { key: 'closed', label: 'Closed', permission: 'view_loan_details' },
   { key: 'all', label: 'All Loans', permission: 'view_loan_details' },
   { key: 'repayment', label: 'Repayment Logs', permission: 'view_repayment_logs' },
@@ -140,6 +142,42 @@ function OverdueTab({ onRowClick, search }) {
           { key: 'repaymentAmount', header: 'Outstanding', render: (row) => formatNaira(row.repaymentAmount), hideOnMobile: true },
           { key: 'penalty', header: 'Penalty', render: (row) => formatNaira(row.penalty) },
           { key: 'daysOverdue', header: 'Days overdue', sortable: true },
+          { key: 'repaymentDate', header: 'Due date', render: (row) => formatDate(row.repaymentDate) },
+        ]}
+      />
+      <PaginationControls page={page} setPage={setPage} total={total} limit={limit} />
+    </div>
+  );
+}
+
+// No date-range filter here — "due today" is a fixed one-day window by
+// definition, not something to pick a range for (matches the backend,
+// which doesn't accept from/to on this endpoint either).
+function DueTodayTab({ onRowClick, search }) {
+  const { page, setPage, skip, limit } = useServerPagination();
+  useEffect(() => {
+    setPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+  const { data: result, isLoading, error } = useDueLoans({ search: search || undefined, skip, limit });
+  const data = result?.data;
+  const total = result?.total;
+
+  return (
+    <div>
+      <DataTable
+        data={data || []}
+        isLoading={isLoading}
+        error={error}
+        getRowId={(row) => row.loanID}
+        onRowClick={onRowClick}
+        emptyTitle="No loans due today"
+        pageSize={DEFAULT_PAGE_SIZE}
+        columns={[
+          { key: 'loanID', header: 'Loan ID', className: 'font-mono text-xs text-ink-500' },
+          customerColumn,
+          { key: 'loanAmount', header: 'Amount', render: (row) => formatNaira(row.loanAmount), sortable: true },
+          { key: 'repaymentAmount', header: 'Amount due', render: (row) => formatNaira(row.repaymentAmount), sortable: true },
           { key: 'repaymentDate', header: 'Due date', render: (row) => formatDate(row.repaymentDate) },
         ]}
       />
@@ -355,6 +393,7 @@ export default function LoansList() {
       <div className="rounded-card bg-white p-4 shadow-sm ring-1 ring-ink-100">
         {activeTab === 'queue' && <QueueTab onRowClick={goToLoan} search={search} />}
         {activeTab === 'overdue' && <OverdueTab onRowClick={goToLoan} search={search} />}
+        {activeTab === 'due' && <DueTodayTab onRowClick={goToLoan} search={search} />}
         {activeTab === 'closed' && <ClosedTab onRowClick={goToLoan} search={search} />}
         {activeTab === 'all' && <AllLoansTab onRowClick={goToLoan} search={search} />}
         {activeTab === 'repayment' && <RepaymentLogsTab onRowClick={goToLoan} search={search} />}

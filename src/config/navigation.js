@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Users,
+  UserX,
   Landmark,
   UserPlus,
   ClipboardList,
@@ -31,6 +32,12 @@ export const NAV_ITEMS = [
     to: '/customers',
     icon: Users,
     permission: 'view_customer_profile',
+  },
+  {
+    label: 'Incomplete Registrations',
+    to: '/incomplete-registrations',
+    icon: UserX,
+    anyOf: ['view_all_incomplete_registrations', 'view_assigned_incomplete_registrations'],
   },
   {
     label: 'Loans',
