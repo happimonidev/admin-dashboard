@@ -102,6 +102,7 @@ function QueueTab({ onRowClick, search }) {
           statusColumn,
           { key: 'loanAmount', header: 'Amount', render: (row) => formatNaira(row.loanAmount), sortable: true },
           { key: 'repaymentAmount', header: 'Repayment', render: (row) => formatNaira(row.repaymentAmount), hideOnMobile: true },
+          { key: 'repaymentDate', header: 'Due date', render: (row) => formatDate(row.repaymentDate), sortable: true },
           reasonColumn,
           { key: 'createdAt', header: 'Created', render: (row) => formatDate(row.createdAt), sortable: true },
         ]}
@@ -275,6 +276,7 @@ function AllLoansTab({ onRowClick, search }) {
           statusColumn,
           { key: 'loanAmount', header: 'Amount', render: (row) => formatNaira(row.loanAmount), sortable: true },
           { key: 'paidAmount', header: 'Paid', render: (row) => formatNaira(row.paidAmount), hideOnMobile: true },
+          { key: 'repaymentDate', header: 'Due date', render: (row) => formatDate(row.repaymentDate), sortable: true },
           { key: 'daysOverdue', header: 'Days overdue', hideOnMobile: true },
           reasonColumn,
           { key: 'createdAt', header: 'Created', render: (row) => formatDate(row.createdAt), sortable: true },
